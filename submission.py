@@ -14,6 +14,7 @@ class Solution:
       The number does not matter as long as the clusters are correct.
       For example: [0, 0, 1] is treated the same as [1, 1, 0]"""
     # implement this function
+    print('test')
     pass
 
   def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
