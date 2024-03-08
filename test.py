@@ -1,8 +1,11 @@
 from submission import Solution
 from typing import List
 
-input_path = 'sample_test_cases/input00.txt'
-output_path = 'sample_test_cases/output00.txt'
+#input_path = 'sample_test_cases/input00.txt'
+#output_path = 'sample_test_cases/output00.txt'
+
+input_path = 'sample_test_cases/test_input00.txt'
+output_path = 'sample_test_cases/test_output00.txt'
 
 with open(input_path, 'r') as f:
     data = [tuple(float(e) for e in s.rstrip('\n').split(' ')) for s in f.readlines()]

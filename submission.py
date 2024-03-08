@@ -6,6 +6,9 @@ from typing import List
 def dist(a: List[float], b: List[float]):
     return ((a[0]-b[0])**2 + (a[1]-b[1])**2)**(1/2)
 
+def replace_list_elements(l: list, before, after):
+   return [(after if (e == before) else e) for e in l]
+
 def reindex_clusters(clusters):
     unique_clusters = set(sorted(clusters))
     normalized_clusters = set([i for i in range(len(set(clusters)))])
@@ -13,7 +16,7 @@ def reindex_clusters(clusters):
     after_clusters = normalized_clusters.difference(unique_clusters)
 
     for b, a in zip(before_clusters, after_clusters):
-        clusters = [(a if (c == b) else c) for c in clusters]
+        clusters = replace_list_elements(clusters, b, a)
     return clusters
 
 class Solution:
@@ -48,8 +51,11 @@ class Solution:
                     min_dist_a = i
                     min_dist_b = j
 
-        clusters[min_dist_a] = clusters[min_dist_b]
+        #clusters[min_dist_a] = clusters[min_dist_b]
+        clusters = replace_list_elements(clusters, clusters[min_dist_b], clusters[min_dist_a])
         clusters = reindex_clusters(clusters)
+        #print(min_dist_a, min_dist_b, min_dist)
+        #print(clusters, len(set(clusters)))
     return clusters
   
   def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
