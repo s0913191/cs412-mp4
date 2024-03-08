@@ -50,12 +50,9 @@ class Solution:
                     min_dist = dist_matrix[i][j]
                     min_dist_a = i
                     min_dist_b = j
-
-        #clusters[min_dist_a] = clusters[min_dist_b]
         clusters = replace_list_elements(clusters, clusters[min_dist_b], clusters[min_dist_a])
         clusters = reindex_clusters(clusters)
-        #print(min_dist_a, min_dist_b, min_dist)
-        #print(clusters, len(set(clusters)))
+
     return clusters
   
   def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
@@ -66,4 +63,26 @@ class Solution:
   def hclus_complete_link(self, X: List[List[float]], K: int) -> List[int]:
     """Average link hierarchical clustering"""
     # implement this function
-    pass
+    N = len(X)
+    dist_matrix = List[List[float]]
+    dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
+
+    # Initialize clusters
+    clusters = List[int]
+    clusters = [i for i in range(N)]
+
+    while len(set(clusters)) > K:
+        # Calculate the minimum distance
+        max_dist = -float('inf')
+        for i in range(N):
+            for j in range(N):
+                if clusters[i] == clusters[j]:
+                    continue
+                if (dist_matrix[i][j] >= max_dist) and (dist_matrix[i][j] != 0):
+                    max_dist = dist_matrix[i][j]
+                    max_dist_a = i
+                    max_dist_b = j
+        clusters = replace_list_elements(clusters, clusters[max_dist_b], clusters[max_dist_a])
+        clusters = reindex_clusters(clusters)
+
+    return clusters
