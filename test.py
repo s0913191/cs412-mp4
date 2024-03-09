@@ -1,8 +1,8 @@
 from submission import Solution
 from typing import List
 
-input_path = 'sample_test_cases/input01.txt'
-output_path = 'sample_test_cases/output01.txt'
+input_path = 'sample_test_cases/input02.txt'
+output_path = 'sample_test_cases/output02.txt'
 
 #input_path = 'sample_test_cases/test_input00.txt'
 #output_path = 'sample_test_cases/test_output00.txt'
@@ -20,7 +20,8 @@ with open(output_path, 'r') as f:
 
 clustering = Solution()
 #clusters = clustering.hclus_single_link(data, K)
-clusters = clustering.hclus_complete_link(data, K)
+#clusters = clustering.hclus_complete_link(data, K)
+clusters = clustering.hclus_average_link(data, K)
 
 
 print(clusters, validate_clusters)
