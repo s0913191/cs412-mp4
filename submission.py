@@ -19,6 +19,18 @@ def reindex_clusters(clusters):
         clusters = replace_list_elements(clusters, b, a)
     return clusters
 
+def get_list_index(l: list, e):
+   return [i for i, x in enumerate(l) if x == e]
+
+
+def complete_link_distance(cluster1_index, cluster2_index, dist_matrix):
+  max_dist = -float('inf')
+  for ci1 in cluster1_index:
+      for ci2 in cluster2_index:
+         if (dist_matrix[ci1][ci2] >= max_dist) and (dist_matrix[ci1][ci2] != 0):
+            max_dist = dist_matrix[ci1][ci2]
+  return max_dist
+
 class Solution:
   def hclus_single_link(self, X: List[List[float]], K: int) -> List[int]:
     """Single link hierarchical clustering
@@ -70,19 +82,35 @@ class Solution:
     # Initialize clusters
     clusters = List[int]
     clusters = [i for i in range(N)]
+    num_of_clusters = len(set(clusters))
 
-    while len(set(clusters)) > K:
-        # Calculate the minimum distance
-        max_dist = -float('inf')
-        for i in range(N):
-            for j in range(N):
-                if clusters[i] == clusters[j]:
-                    continue
-                if (dist_matrix[i][j] >= max_dist) and (dist_matrix[i][j] != 0):
-                    max_dist = dist_matrix[i][j]
-                    max_dist_a = i
-                    max_dist_b = j
-        clusters = replace_list_elements(clusters, clusters[max_dist_b], clusters[max_dist_a])
-        clusters = reindex_clusters(clusters)
+    while num_of_clusters > K:
+      cluster_dist_matrix = List[List[float]]
+      cluster_dist_matrix = [[0 for i in range(num_of_clusters)] for j in range(num_of_clusters)]
 
+      for c1 in set(clusters):
+         for c2 in set(clusters):
+          if c1 == c2:
+             continue
+          cluster1_index = get_list_index(clusters, c1)
+          cluster2_index = get_list_index(clusters, c2)
+          cluster_dist_matrix[c1][c2] = complete_link_distance(cluster1_index, cluster2_index, dist_matrix)
+
+      # Calculate the minimum distance between clusters
+      min_dist = float('inf')
+      for i in range(len(cluster_dist_matrix)):
+          for j in range(len(cluster_dist_matrix)):
+             if i == j:
+                continue
+             if (cluster_dist_matrix[i][j] <= min_dist) and (cluster_dist_matrix[i][j] != 0):
+              min_dist = cluster_dist_matrix[i][j]
+              min_dist_a = i
+              min_dist_b = j
+      clusters = replace_list_elements(clusters, min_dist_b, min_dist_a)
+      clusters = reindex_clusters(clusters)
+      num_of_clusters = len(set(clusters))
+
+      #print(min_dist_a, min_dist_b)
+      #print(clusters, num_of_clusters)
+    
     return clusters
