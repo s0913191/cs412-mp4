@@ -22,6 +22,34 @@ def reindex_clusters(clusters):
 def get_list_index(l: list, e):
    return [i for i, x in enumerate(l) if x == e]
 
+def cluster_min_distance(cluster_dist_matrix):
+  # Calculate the minimum distance between clusters
+  min_dist = float('inf')
+  for i in range(len(cluster_dist_matrix)):
+    for j in range(len(cluster_dist_matrix)):
+      if i == j:
+        continue
+      if (cluster_dist_matrix[i][j] <= min_dist) and (cluster_dist_matrix[i][j] != 0):
+        min_dist = cluster_dist_matrix[i][j]
+        min_dist_a = i
+        min_dist_b = j
+  return min_dist, min_dist_a, min_dist_b
+
+def single_link_distance(cluster1_index, cluster2_index, dist_matrix):
+  """
+  Args:
+    - cluster1_index: 
+    - cluster2_index:
+    - dist_matrix: distance matrix for all input data points
+  Returns:
+    Min distance between clusters
+  """
+  min_dist = float('inf')
+  for ci1 in cluster1_index:
+      for ci2 in cluster2_index:
+         if (dist_matrix[ci1][ci2] <= min_dist) and (dist_matrix[ci1][ci2] != 0):
+            min_dist = dist_matrix[ci1][ci2]
+  return min_dist
 
 def complete_link_distance(cluster1_index, cluster2_index, dist_matrix):
   """
@@ -38,7 +66,6 @@ def complete_link_distance(cluster1_index, cluster2_index, dist_matrix):
          if (dist_matrix[ci1][ci2] >= max_dist) and (dist_matrix[ci1][ci2] != 0):
             max_dist = dist_matrix[ci1][ci2]
   return max_dist
-
 
 def average_link_distance(cluster1_index, cluster2_index, X):
   cluster1_sum_x = 0
@@ -72,34 +99,7 @@ class Solution:
       A list of integers (range from 0 to K - 1) that represent class labels.
       The number does not matter as long as the clusters are correct.
       For example: [0, 0, 1] is treated the same as [1, 1, 0]"""
-    # implement this function
-
-    N = len(X)
-    dist_matrix = List[List[float]]
-    dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
-
-    # Initialize clusters
-    clusters = List[int]
-    clusters = [i for i in range(N)]
-
-    while len(set(clusters)) > K:
-        # Calculate the minimum distance
-        min_dist = float('inf')
-        for i in range(N):
-            for j in range(N):
-                if clusters[i] == clusters[j]:
-                    continue
-                if (dist_matrix[i][j] <= min_dist) and (dist_matrix[i][j] != 0):
-                    min_dist = dist_matrix[i][j]
-                    min_dist_a = i
-                    min_dist_b = j
-        clusters = replace_list_elements(clusters, clusters[min_dist_b], clusters[min_dist_a])
-        clusters = reindex_clusters(clusters)
-
-    return clusters
-  
-  def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
-    """Complete link hierarchical clustering"""
+    
     N = len(X)
     dist_matrix = List[List[float]]
     dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
@@ -119,27 +119,48 @@ class Solution:
              continue
           cluster1_index = get_list_index(clusters, c1)
           cluster2_index = get_list_index(clusters, c2)
-          cluster_dist_matrix[c1][c2] = average_link_distance(cluster1_index, cluster2_index, X)
+          cluster_dist_matrix[c1][c2] = single_link_distance(cluster1_index, cluster2_index, dist_matrix)
 
-      # Calculate the minimum distance between clusters
-      min_dist = float('inf')
-      for i in range(len(cluster_dist_matrix)):
-          for j in range(len(cluster_dist_matrix)):
-             if i == j:
-                continue
-             if (cluster_dist_matrix[i][j] <= min_dist) and (cluster_dist_matrix[i][j] != 0):
-              min_dist = cluster_dist_matrix[i][j]
-              min_dist_a = i
-              min_dist_b = j
+      min_dist, min_dist_a, min_dist_b = cluster_min_distance(cluster_dist_matrix)
       clusters = replace_list_elements(clusters, min_dist_b, min_dist_a)
       clusters = reindex_clusters(clusters)
       num_of_clusters = len(set(clusters))
-      print(clusters, num_of_clusters)
 
+    return clusters
+  
+  def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
+    """Average link hierarchical clustering"""
+    N = len(X)
+
+    # not needed for average link
+    #dist_matrix = List[List[float]]
+    #dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
+
+    # Initialize clusters
+    clusters = List[int]
+    clusters = [i for i in range(N)]
+    num_of_clusters = len(set(clusters))
+
+    while num_of_clusters > K:
+      cluster_dist_matrix = List[List[float]]
+      cluster_dist_matrix = [[0 for i in range(num_of_clusters)] for j in range(num_of_clusters)]
+
+      for c1 in set(clusters):
+         for c2 in set(clusters):
+          if c1 == c2:
+             continue
+          cluster1_index = get_list_index(clusters, c1)
+          cluster2_index = get_list_index(clusters, c2)
+          cluster_dist_matrix[c1][c2] = average_link_distance(cluster1_index, cluster2_index, X)
+
+      min_dist, min_dist_a, min_dist_b = cluster_min_distance(cluster_dist_matrix)
+      clusters = replace_list_elements(clusters, min_dist_b, min_dist_a)
+      clusters = reindex_clusters(clusters)
+      num_of_clusters = len(set(clusters))
     return clusters
 
   def hclus_complete_link(self, X: List[List[float]], K: int) -> List[int]:
-    """Average link hierarchical clustering"""
+    """Complete link hierarchical clustering"""
     N = len(X)
     dist_matrix = List[List[float]]
     dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
@@ -161,16 +182,7 @@ class Solution:
           cluster2_index = get_list_index(clusters, c2)
           cluster_dist_matrix[c1][c2] = complete_link_distance(cluster1_index, cluster2_index, dist_matrix)
 
-      # Calculate the minimum distance between clusters
-      min_dist = float('inf')
-      for i in range(len(cluster_dist_matrix)):
-          for j in range(len(cluster_dist_matrix)):
-             if i == j:
-                continue
-             if (cluster_dist_matrix[i][j] <= min_dist) and (cluster_dist_matrix[i][j] != 0):
-              min_dist = cluster_dist_matrix[i][j]
-              min_dist_a = i
-              min_dist_b = j
+      min_dist, min_dist_a, min_dist_b = cluster_min_distance(cluster_dist_matrix)
       clusters = replace_list_elements(clusters, min_dist_b, min_dist_a)
       clusters = reindex_clusters(clusters)
       num_of_clusters = len(set(clusters))
