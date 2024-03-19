@@ -67,6 +67,27 @@ def complete_link_distance(cluster1_index, cluster2_index, dist_matrix):
             max_dist = dist_matrix[ci1][ci2]
   return max_dist
 
+
+def average_link_distance(cluster1_index, cluster2_index, dist_matrix):
+  """
+  Args:
+    - cluster1_index: 
+    - cluster2_index:
+    - dist_matrix: distance matrix for all input data points
+  Returns:
+    Average distance between clusters
+  """
+  avg_dist = 0
+
+  for ci1 in cluster1_index:
+      for ci2 in cluster2_index:
+         avg_dist += dist_matrix[ci1][ci2]
+
+
+  avg_dist /= len(cluster1_index)*len(cluster2_index)
+  return avg_dist
+
+"""
 def average_link_distance(cluster1_index, cluster2_index, X):
   cluster1_sum_x = 0
   cluster1_sum_y = 0
@@ -87,7 +108,7 @@ def average_link_distance(cluster1_index, cluster2_index, X):
 
   distance = dist([x1, y1], [x2, y2])
   return distance
-
+"""
 
 class Solution:
   def hclus_single_link(self, X: List[List[float]], K: int) -> List[int]:
@@ -131,6 +152,8 @@ class Solution:
   def hclus_average_link(self, X: List[List[float]], K: int) -> List[int]:
     """Average link hierarchical clustering"""
     N = len(X)
+    dist_matrix = List[List[float]]
+    dist_matrix = [[dist(X[i], X[j]) for i in range(N)] for j in range(N)]
 
     # not needed for average link
     #dist_matrix = List[List[float]]
@@ -151,7 +174,7 @@ class Solution:
              continue
           cluster1_index = get_list_index(clusters, c1)
           cluster2_index = get_list_index(clusters, c2)
-          cluster_dist_matrix[c1][c2] = average_link_distance(cluster1_index, cluster2_index, X)
+          cluster_dist_matrix[c1][c2] = average_link_distance(cluster1_index, cluster2_index, dist_matrix)
 
       min_dist, min_dist_a, min_dist_b = cluster_min_distance(cluster_dist_matrix)
       clusters = replace_list_elements(clusters, min_dist_b, min_dist_a)
